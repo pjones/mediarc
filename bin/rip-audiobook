@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+
+# Rip a CD as part of an audio book, one track per CD.
+
+################################################################################
+set -eu
+set -o pipefail
+
+################################################################################
+top=$(realpath "$(dirname "$0")/..")
+option_single_track=1
+
+################################################################################
+usage() {
+  cat <<EOF
+Usage: $(basename "$0") [options]
+
+  -h      This message
+  -t      Rip each track individually [default: single track]
+
+EOF
+}
+
+################################################################################
+main() {
+  local args=()
+
+  # Option arguments are in $OPTARG
+  while getopts "ht" o; do
+    case "${o}" in
+    h)
+      usage
+      exit
+      ;;
+
+    t)
+      option_single_track=0
+      ;;
+
+    *)
+      exit 1
+      ;;
+    esac
+  done
+
+  shift $((OPTIND - 1))
+
+  if [ "$option_single_track" -eq 1 ]; then
+    args+=("-1") # Rip the entire CD as a single track.
+  fi
+
+  # Set the configuration file:
+  args+=("-c" "$top/etc/audiobook.conf")
+
+  # Pads track numbers with 0's.
+  args+=("-p")
+
+  # Enable parallel encoder with N processes:
+  args+=("-j" "2")
+
+  # Go!
+  abcde "${args[@]}"
+}
+
+################################################################################
+main "$@"
