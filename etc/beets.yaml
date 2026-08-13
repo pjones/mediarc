@@ -12,20 +12,28 @@ ui:
 
 ################################################################################
 # List of plug-ins;
-plugins: >-
-  bucket
-  embedart
-  fetchart
-  ftintitle
-  importadded
-  missing
-  play
-  replaygain
-  random
-  smartplaylist
-  the
-  types
-  web
+plugins:
+  - bucket
+  - embedart
+  - fetchart
+  - ftintitle
+  - importadded
+  - missing
+  - musicbrainz
+  - random
+  - replaygain
+  - smartplaylist
+  - the
+  - types
+
+################################################################################
+# Music importer settings:
+import:
+  none_rec_action: ask
+  autotag: yes
+  incremental: no
+  resume: no
+  log: ~/documents/ripping/beets.log
 
 ################################################################################
 # Where to put music files in the library directory:
@@ -45,7 +53,7 @@ the:
 
 ################################################################################
 replaygain:
-  backend: command
+  backend: ffmpeg
 
 ################################################################################
 # Sorting music into different "bucket" directories:
@@ -53,15 +61,6 @@ bucket:
   bucket_alpha: ['#', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
   bucket_alpha_regex:
     '#': ^[^A-Za-z]
-
-################################################################################
-# Music importer settings:
-import:
-  none_rec_action: ask
-  autotag: yes
-  incremental: no
-  resume: no
-  log: ~/documents/ripping/beets.log
 
 ################################################################################
 # MusicBrainz settings:
@@ -74,12 +73,6 @@ match:
     original_year: yes
 
 ################################################################################
-# Settings for the `beet play` command:
-play:
-  relative_to: ~/documents/music/audio
-  command: bash -c 'cat $0 | mpc add'
-
-################################################################################
 # Settings for the types plug-in.
 # http://beets.readthedocs.org/en/latest/plugins/types.html
 types:
@@ -89,7 +82,6 @@ types:
 # Smart playlists.
 # http://beets.readthedocs.org/en/latest/plugins/smartplaylist.html
 smartplaylist:
-    relative_to: ~/documents/music/audio
     playlist_dir: ~/documents/music/playlists
     auto: yes
 

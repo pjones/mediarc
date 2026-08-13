@@ -1,47 +1,33 @@
 {
-  description = "Peter's Media Configuration and Scripts";
-
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+    flake-parts.url = "github:hercules-ci/flake-parts";
   };
 
-  outputs = { self, nixpkgs }:
-    let
-      inherit (nixpkgs) lib;
+  outputs =
+    inputs:
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } (
+      { self, ... }: {
+        systems = [
+          "x86_64-linux"
+          "aarch64-darwin"
+          "x86_64-darwin"
+        ];
 
-      # List of supported systems:
-      supportedSystems = [
-        "x86_64-linux"
-        "aarch64-linux"
-        "x86_64-darwin"
-        "aarch64-darwin"
-        "armv7l-linux"
-        "i686-linux"
-      ];
+        perSystem =
+          { pkgs, system, ... }:
+          {
+            packages.mediarc = pkgs.callPackage ./. { };
 
-      # Function to generate a set based on supported systems:
-      forAllSystems = f:
-        nixpkgs.lib.genAttrs supportedSystems (system: f system);
+            devShells.default = pkgs.mkShell {
+              NIX_PATH = "nixpkgs=${pkgs.path}";
+              inputsFrom = builtins.attrValues self.packages.${system};
 
-      # Attribute set of nixpkgs for each system:
-      nixpkgsFor = forAllSystems (system: import nixpkgs { inherit system; });
-    in
-    {
-      packages = forAllSystems (system:
-        let pkgs = nixpkgsFor.${system}; in {
-          mediarc = pkgs.callPackage ./. { };
-        });
-
-      overlays.mediarc = final: prev: {
-        pjones = (prev.pjones or { }) // {
-          mediarc = self.packages.${prev.system}.mediarc;
-        };
-      };
-
-      devShells = forAllSystems (system: {
-        default = nixpkgsFor.${system}.mkShell {
-          inputsFrom = builtins.attrValues self.packages.${system};
-        };
-      });
-    };
+              nativeBuildInputs = with pkgs; [
+                beets
+              ];
+            };
+          };
+      }
+    );
 }
